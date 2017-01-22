@@ -48,10 +48,10 @@ if __name__ == '__main__':
     )
     net.add_conv(patch_size=3, in_depth=num_channels, out_depth=32, activation='relu', pooling=False, name='conv1')
     net.add_conv(patch_size=3, in_depth=32, out_depth=32, activation='relu', pooling=True, name='conv2')
-    # net.add_conv(patch_size=3, in_depth=32, out_depth=32, activation='relu', pooling=False, name='conv3')
-    # net.add_conv(patch_size=3, in_depth=32, out_depth=32, activation='relu', pooling=True, name='conv4')
+    net.add_conv(patch_size=3, in_depth=32, out_depth=32, activation='relu', pooling=False, name='conv3')
+    net.add_conv(patch_size=3, in_depth=32, out_depth=32, activation='relu', pooling=True, name='conv4')
 
-    net.add_fc(in_num_nodes=(image_size // 2) * (image_size // 2) * 32, out_num_nodes=128, activation='relu',
+    net.add_fc(in_num_nodes=(image_size // 4) * (image_size // 4) * 32, out_num_nodes=128, activation='relu',
                name='fc1')
     net.add_fc(in_num_nodes=128, out_num_nodes=10, activation=None, name='fc2')
 
