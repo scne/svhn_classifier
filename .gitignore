@@ -96,3 +96,4 @@ ENV/
 /pip-selfcheck.json
 /.idea
 /svhn/board/
+/svhn/model/

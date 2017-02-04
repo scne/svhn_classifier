@@ -54,6 +54,28 @@ class Network:
             self.conv_weights.append(weights)
             self.conv_biases.append(biases)
 
+        # with tf.name_scope('Visualize_filters') as scope:
+        #     # In this section, we visualize the filters of the first convolutional layers
+        #     # We concatenate the filters into one image
+        #     # Credits for the inspiration go to Martin Gorner
+        #     W1_a = weights  # [5, 5, 1, 32]
+        #     W1pad = tf.zeros([patch_size, patch_size, in_depth, out_depth])  # [5, 5, 1, 4]  - four zero kernels for padding
+        #     # We have a 6 by 6 grid of kernepl visualizations. yet we only have 32 filters
+        #     # Therefore, we concatenate 4 empty filters
+        #     W1_b = tf.concat(3, [W1_a, W1pad, W1pad, W1pad, W1pad, W1pad])  # [5, 5, 1, 36]
+        #     W1_c = tf.split(3, 6*out_depth, W1_b)  # 36 x [5, 5, 1, 1]
+        #     W1_row0 = tf.concat(0, W1_c[0:32])  # [30, 5, 1, 1]
+        #     W1_row1 = tf.concat(0, W1_c[32:64])  # [30, 5, 1, 1]
+        #     W1_row2 = tf.concat(0, W1_c[64:96])  # [30, 5, 1, 1]
+        #     W1_row3 = tf.concat(0, W1_c[96:128])  # [30, 5, 1, 1]
+        #     W1_row4 = tf.concat(0, W1_c[128:160])  # [30, 5, 1, 1]
+        #     W1_row5 = tf.concat(0, W1_c[160:192])  # [30, 5, 1, 1]
+        #     W1_d = tf.concat(1, [W1_row0, W1_row1, W1_row2, W1_row3, W1_row4, W1_row5])  # [30, 30, 1, 1]
+        #     dim = W1_d.get_shape()
+        #     W1_e = tf.reshape(W1_d, [dim[3].value, dim[0].value, dim[1].value, dim[2].value])
+        #     Wtag = tf.placeholder(tf.string, None)
+        #     tf.summary.image("Visualize_kernels", W1_e)
+
     def add_fc(self, in_num_nodes, out_num_nodes, activation='relu', name='fc'):
         self.fc_config.append({
             'in_num_nodes': in_num_nodes,
@@ -66,8 +88,8 @@ class Network:
             biases = tf.Variable(tf.constant(0.1, shape=[out_num_nodes]))
             self.fc_weights.append(weights)
             self.fc_biases.append(biases)
-            self.train_summaries.append(tf.histogram_summary(str(len(self.fc_weights)) + '_weights', weights))
-            self.train_summaries.append(tf.histogram_summary(str(len(self.fc_biases)) + '_biases', biases))
+            self.train_summaries.append(tf.summary.histogram(str(len(self.fc_weights)) + '_weights', weights))
+            self.train_summaries.append(tf.summary.histogram(str(len(self.fc_biases)) + '_biases', biases))
 
     def apply_regularization(self, _lambda):
         # L2 regularization for the fully connected parameters
@@ -141,7 +163,7 @@ class Network:
         with tf.name_scope('loss'):
             self.loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits, self.tf_train_labels))
             self.loss += self.apply_regularization(_lambda=5e-4)
-            self.train_summaries.append(tf.scalar_summary('Loss', self.loss))
+            self.train_summaries.append(tf.summary.scalar('Loss', self.loss))
 
         # learning rate decay
         global_step = tf.Variable(0)
@@ -176,31 +198,30 @@ class Network:
             self.test_prediction = tf.nn.softmax(model(self.tf_test_samples, train=False), name='test_prediction')
             tf.add_to_collection("prediction", self.test_prediction)
 
-            single_shape = (1, 32, 32, 1)
-            single_input = tf.placeholder(tf.float32, shape=single_shape, name='single_input')
-            self.single_prediction = tf.nn.softmax(model(single_input, train=False), name='single_prediction')
-            tf.add_to_collection("prediction", self.single_prediction)
+        self.merged_train_summary = tf.summary.merge(self.train_summaries)
+        self.merged_test_summary = tf.summary.merge(self.test_summaries)
 
-        self.merged_train_summary = tf.merge_summary(self.train_summaries)
-        self.merged_test_summary = tf.merge_summary(self.test_summaries)
-
-        self.saver = tf.train.Saver(tf.all_variables())
+        self.saver = tf.train.Saver(tf.global_variables())
 
     def run(self, train_samples, train_labels, test_samples, test_labels, train_data_iterator, iteration_steps,
             test_data_iterator):
-        self.writer = tf.train.SummaryWriter('./board', tf.get_default_graph())
 
         with tf.Session(graph=tf.get_default_graph()) as session:
-            tf.initialize_all_variables().run()
+            self.writer = tf.summary.FileWriter('./board', session.graph)
+            tf.global_variables_initializer().run()
 
             print('Start Training')
-            # batch 1000
             for i, samples, labels in train_data_iterator(train_samples, train_labels, iteration_steps=iteration_steps,
                                                           chunkSize=self.train_batch_size):
+                run_options = tf.RunOptions(trace_level=tf.RunOptions.FULL_TRACE)
+                run_metadata = tf.RunMetadata()
                 _, l, predictions, summary = session.run(
                     [self.optimizer, self.loss, self.train_prediction, self.merged_train_summary],
-                    feed_dict={self.tf_train_samples: samples, self.tf_train_labels: labels}
+                    feed_dict={self.tf_train_samples: samples, self.tf_train_labels: labels},
+                    options=run_options,
+                    run_metadata=run_metadata
                 )
+                self.writer.add_run_metadata(run_metadata, 'step%d' % i)
                 self.writer.add_summary(summary, i)
                 # labels is True Labels
                 accuracy, _ = self.accuracy(predictions, labels)
@@ -226,18 +247,23 @@ class Network:
         ###
 
     def train(self, train_samples, train_labels, data_iterator, iteration_steps):
-        self.writer = tf.train.SummaryWriter('./board', tf.get_default_graph())
         with tf.Session(graph=tf.get_default_graph()) as session:
-            tf.initialize_all_variables().run()
+            self.writer = tf.summary.FileWriter('./board', session.graph)
+            tf.global_variables_initializer().run()
 
             print('Start Training')
             # batch 1000
             for i, samples, labels in data_iterator(train_samples, train_labels, iteration_steps=iteration_steps,
                                                     chunkSize=self.train_batch_size):
+                run_options = tf.RunOptions(trace_level=tf.RunOptions.FULL_TRACE)
+                run_metadata = tf.RunMetadata()
                 _, l, predictions, summary = session.run(
                     [self.optimizer, self.loss, self.train_prediction, self.merged_train_summary],
-                    feed_dict={self.tf_train_samples: samples, self.tf_train_labels: labels}
+                    feed_dict={self.tf_train_samples: samples, self.tf_train_labels: labels},
+                    options=run_options,
+                    run_metadata=run_metadata
                 )
+                self.writer.add_run_metadata(run_metadata, 'step%d' % i)
                 self.writer.add_summary(summary, i)
                 # labels is True Labels
                 accuracy, _ = self.accuracy(predictions, labels)
@@ -258,7 +284,7 @@ class Network:
         if self.saver is None:
             self.define_model()
         if self.writer is None:
-            self.writer = tf.train.SummaryWriter('./board', tf.get_default_graph())
+            self.writer = tf.summary.FileWriter('./board', tf.get_default_graph())
 
         print('Before session')
         with tf.Session(graph=tf.get_default_graph()) as session:
@@ -297,7 +323,7 @@ class Network:
         # print(filter_map.get_shape())
         filter_map = tf.reshape(filter_map, (how_many, display_size, display_size, 1))
         # print(how_many)
-        self.test_summaries.append(tf.image_summary(name, tensor=filter_map, max_images=how_many))
+        self.test_summaries.append(tf.summary.image(name, tensor=filter_map, max_outputs=how_many))
 
     def print_confusion_matrix(self, confusionMatrix):
         print('Confusion    Matrix:')

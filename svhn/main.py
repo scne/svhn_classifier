@@ -1,3 +1,4 @@
+
 if __name__ == '__main__':
     import load
     from dp import Network
@@ -57,9 +58,10 @@ if __name__ == '__main__':
 
     net.define_model()
     net.run(train_samples, train_labels, test_samples, test_labels, train_data_iterator=train_data_iterator,
-            iteration_steps=3000, test_data_iterator=test_data_iterator)
-# net.train(train_samples, train_labels, data_iterator=train_data_iterator, iteration_steps=2000)
-# net.test(test_samples, test_labels, data_iterator=test_data_iterator)
+             iteration_steps=3000, test_data_iterator=test_data_iterator)
+    #net.train(train_samples, train_labels, data_iterator=train_data_iterator, iteration_steps=3000)
+    #net.test(test_samples, test_labels, data_iterator=test_data_iterator)
+
 
 else:
     raise Exception('main.py: Should Not Be Imported!!! Must Run by "python main.py"')
