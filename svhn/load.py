@@ -49,7 +49,7 @@ def distribution(labels, semples, name):
         indeces = np.where(labels == [i])
         semple = semples[indeces[0]]
         print('----------------------------------')
-        print('Label:', i)
+        print('Label:', i, 'number sample: ', len(semple))
         print('Mean:', np.mean(semple))
         print('Standard deviation:', np.std(semple))
         # inspect(semples, labels, indeces[0][6])
@@ -80,8 +80,7 @@ def inspect(dataset, labels, i):
 
 train = load('/home/claudio/Documents/DiLecce/svhn/train_32x32.mat')
 test = load('/home/claudio/Documents/DiLecce/svhn/test_32x32.mat')
-valid = load('/home/claudio/Documents/DiLecce/svhn/extra_32x32.mat')
-# extra = load('../data/extra_32x32.mat')
+#valid = load('/home/claudio/Documents/DiLecce/svhn/extra_32x32.mat')
 
 # print('Train Samples Shape:', train['X'].shape)
 # print('Train  Labels Shape:', train['y'].shape)
@@ -89,25 +88,23 @@ valid = load('/home/claudio/Documents/DiLecce/svhn/extra_32x32.mat')
 # print('Train Samples Shape:', test['X'].shape)
 # print('Train  Labels Shape:', test['y'].shape)
 
-# print('Train Samples Shape:', extra['X'].shape)
-# print('Train  Labels Shape:', extra['y'].shape)
+# print('Train Samples Shape:', valid['X'].shape)
+# print('Train  Labels Shape:', valid['y'].shape)
 
 train_samples = train['X']
 train_labels = train['y']
 test_samples = test['X']
 test_labels = test['y']
-valid_samples = valid['X']
-valid_labels = valid['y']
-# extra_samples = extra['X']
-# extra_labels = extra['y']
+#valid_samples = valid['X']
+#valid_labels = valid['y']
 
 n_train_samples, _train_labels = reformat(train_samples, train_labels)
 n_test_samples, _test_labels = reformat(test_samples, test_labels)
-n_valid_samples, _valid_labels = reformat(valid_samples, valid_labels)
+#n_valid_samples, _valid_labels = reformat(valid_samples, valid_labels)
 
 _train_samples = normalize(n_train_samples)
 _test_samples = normalize(n_test_samples)
-_valid_samples = normalize(n_valid_samples)
+#_valid_samples = normalize(n_valid_samples)
 
 num_labels = 10
 image_size = 32
@@ -119,4 +116,4 @@ if __name__ == '__main__':
     # inspect(_train_samples, _train_labels, 1234)
     distribution(train_labels, _train_samples, 'Train Labels')
     distribution(test_labels, _test_samples, 'Test Labels')
-    distribution(_valid_labels, _valid_samples, 'Test Labels')
+    #distribution(_valid_labels, _valid_samples, 'Test Labels')
