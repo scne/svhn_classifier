@@ -47,7 +47,7 @@ def distribution(labels, semples, name):
             count[key] = 1
     for i in range(1, 11):
         indeces = np.where(labels == [i])
-        semple = semples[indeces[0]]
+        semple = np.take(semples, indeces[0])
         print('----------------------------------')
         print('Label:', i, 'number sample: ', len(semple))
         print('Mean:', np.mean(semple))
@@ -106,6 +106,16 @@ _train_samples = normalize(n_train_samples)
 _test_samples = normalize(n_test_samples)
 #_valid_samples = normalize(n_valid_samples)
 
+# _train_samples = np.concatenate((_train_samples, _valid_samples))[0:574388,:,:,:]
+# _train_labels =  np.concatenate((_train_labels, _valid_labels))[0:574388,:,:,:]
+# n_train_samples =  np.concatenate((n_train_samples, n_valid_samples))[0:574388,:,:,:]
+# train_labels = np.concatenate((train_labels, valid_labels))[0:574388,:,:,:]
+
+# _valid_samples = np.concatenate((_train_samples, _valid_samples))[574389:604388,:,:,:]
+# _valid_labels =  np.concatenate((_train_labels, _valid_labels))[574389:604388,:,:,:]
+# n_valid_samples =  np.concatenate((n_train_samples, n_valid_samples))[574389:604388,:,:,:]
+# valid_labels = np.concatenate((train_labels, valid_labels))[574389:604388,:,:,:]
+
 num_labels = 10
 image_size = 32
 num_channels = 1
@@ -116,4 +126,4 @@ if __name__ == '__main__':
     # inspect(_train_samples, _train_labels, 1234)
     distribution(train_labels, _train_samples, 'Train Labels')
     distribution(test_labels, _test_samples, 'Test Labels')
-    #distribution(_valid_labels, _valid_samples, 'Test Labels')
+    #distribution(valid_labels, _valid_samples, 'Valid Labels')
