@@ -98,6 +98,12 @@ test_labels = test['y']
 #valid_samples = valid['X']
 #valid_labels = valid['y']
 
+# train_samples = np.concatenate((train_samples, valid_samples), axis=3)[:,:,:,0:574388]
+# train_labels = np.concatenate((train_labels, valid_labels))[0:574388,:]
+#
+# valid_samples = np.concatenate((train_samples, valid_samples), axis=3)[:,:,:,574388:604388]
+# valid_labels = np.concatenate((train_labels, valid_labels))[574388:604388,:]
+
 n_train_samples, _train_labels = reformat(train_samples, train_labels)
 n_test_samples, _test_labels = reformat(test_samples, test_labels)
 #n_valid_samples, _valid_labels = reformat(valid_samples, valid_labels)
@@ -105,16 +111,6 @@ n_test_samples, _test_labels = reformat(test_samples, test_labels)
 _train_samples = normalize(n_train_samples)
 _test_samples = normalize(n_test_samples)
 #_valid_samples = normalize(n_valid_samples)
-
-# _train_samples = np.concatenate((_train_samples, _valid_samples))[0:574388,:,:,:]
-# _train_labels =  np.concatenate((_train_labels, _valid_labels))[0:574388,:,:,:]
-# n_train_samples =  np.concatenate((n_train_samples, n_valid_samples))[0:574388,:,:,:]
-# train_labels = np.concatenate((train_labels, valid_labels))[0:574388,:,:,:]
-
-# _valid_samples = np.concatenate((_train_samples, _valid_samples))[574389:604388,:,:,:]
-# _valid_labels =  np.concatenate((_train_labels, _valid_labels))[574389:604388,:,:,:]
-# n_valid_samples =  np.concatenate((n_train_samples, n_valid_samples))[574389:604388,:,:,:]
-# valid_labels = np.concatenate((train_labels, valid_labels))[574389:604388,:,:,:]
 
 num_labels = 10
 image_size = 32

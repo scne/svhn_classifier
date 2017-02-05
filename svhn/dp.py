@@ -232,9 +232,13 @@ class Network:
             accuracies = []
             confusionMatrices = []
             for i, samples, labels in test_data_iterator(test_samples, test_labels, chunkSize=self.test_batch_size):
+                run_options = tf.RunOptions(trace_level=tf.RunOptions.FULL_TRACE)
+                run_metadata = tf.RunMetadata()
                 result, summary = session.run(
                     [self.test_prediction, self.merged_test_summary],
-                    feed_dict={self.tf_test_samples: samples}
+                    feed_dict={self.tf_test_samples: samples},
+                    options=run_options,
+                    run_metadata=run_metadata
                 )
                 self.writer.add_summary(summary, i)
                 accuracy, cm = self.accuracy(result, labels, need_confusion_matrix=True)
@@ -293,11 +297,15 @@ class Network:
             accuracies = []
             confusionMatrices = []
             for i, samples, labels in data_iterator(test_samples, test_labels, chunkSize=self.test_batch_size):
-                result = session.run(
-                    self.test_prediction,
-                    feed_dict={self.tf_test_samples: samples}
+                run_options = tf.RunOptions(trace_level=tf.RunOptions.FULL_TRACE)
+                run_metadata = tf.RunMetadata()
+                result, summary = session.run(
+                    [self.test_prediction, self.merged_test_summary],
+                    feed_dict={self.tf_test_samples: samples},
+                    options=run_options,
+                    run_metadata=run_metadata
                 )
-                # self.writer.add_summary(summary, i)
+                self.writer.add_summary(summary, i)
                 accuracy, cm = self.accuracy(result, labels, need_confusion_matrix=True)
                 accuracies.append(accuracy)
                 confusionMatrices.append(cm)
