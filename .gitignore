@@ -97,3 +97,4 @@ ENV/
 /.idea
 /svhn/board/
 /svhn/model/
+*png

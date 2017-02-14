@@ -1,11 +1,47 @@
-
 from __future__ import print_function, division
 from scipy.io import loadmat as load
 import matplotlib.pyplot as plt
 import numpy as np
 
 
+def uniformize(samples, labels):
+    """ Getting the minimum counter foreach samples,
+    in training dataset, and truncate all other
+    to this threshold
+    """
+    count = {}
+    for label in labels:
+        key = 0 if label[0] == 10 else label[0]
+        if key in count:
+            count[key] += 1
+        else:
+            count[key] = 1
+
+    minimun = count[min(count, key=count.get)]
+
+    for i in range(1, 11):
+        indeces = np.where(labels == [i])
+        if (len(indeces[0]) - minimun) > 0:
+            indeces_final = np.random.choice(indeces[0], (len(indeces[0]) - minimun), replace=False)
+            samples = np.delete(samples, indeces_final, 3)
+            labels = np.delete(labels, indeces_final, 0)
+
+    count = {}
+    for label in labels:
+        key = 0 if label[0] == 10 else label[0]
+        if key in count:
+            count[key] += 1
+        else:
+            count[key] = 1
+
+    return samples, labels
+
+
 def reformat(samples, labels):
+    """ Reshape samples in all dataset in this way (0,1,2,3) -> (3,0,1,2)
+    and encode labels set in one-hot set taking care to translate
+    label 10 to 0
+    """
     #  0       1       2      3          3       0       1      2
     new = np.transpose(samples, (3, 0, 1, 2)).astype(np.float32)
 
@@ -26,18 +62,18 @@ def reformat(samples, labels):
 
 
 def normalize(samples):
+    """ Reduce samples dimension in all dataset from this shape (size,32,32,3) to
+    (size,32,32,1)
+    """
     a = np.add.reduce(samples, keepdims=True, axis=3)
     a = a / 3.0
     return a / 128.0 - 1.0
 
 
 def distribution(labels, semples, name):
-    # keys:
-    # 0
-    # 1
-    # 2
-    # ...
-    # 9
+    """ Evaluate distribution of each keys: 0, 1, ..., 9 in each
+    dataset, and print mean and standard deviation for this
+    """
     count = {}
     for label in labels:
         key = 0 if label[0] == 10 else label[0]
@@ -45,15 +81,17 @@ def distribution(labels, semples, name):
             count[key] += 1
         else:
             count[key] = 1
+
+    print('------------',name,'--------------')
     for i in range(1, 11):
         indeces = np.where(labels == [i])
-        semple = np.take(semples, indeces[0])
+        semple = semples[indeces[0]]
         print('----------------------------------')
         print('Label:', i, 'number sample: ', len(semple))
         print('Mean:', np.mean(semple))
         print('Standard deviation:', np.std(semple))
-        # inspect(semples, labels, indeces[0][6])
         print('----------------------------------')
+
     x = []
     y = []
     for k, v in count.items():
@@ -61,15 +99,18 @@ def distribution(labels, semples, name):
         x.append(k)
         y.append(v)
 
+    fig = plt.figure()
     y_pos = np.arange(len(x))
     plt.bar(y_pos, y, align='center', alpha=0.5)
     plt.xticks(y_pos, x)
     plt.ylabel('Count')
     plt.title(name + ' Label Distribution')
     plt.show()
+    fig.savefig(name, dpi=fig.dpi)
 
 
 def inspect(dataset, labels, i):
+    """ Show a resampled image from index i"""
     if dataset.shape[3] == 1:
         shape = dataset.shape
         dataset = dataset.reshape(shape[0], shape[1], shape[2])
@@ -80,37 +121,39 @@ def inspect(dataset, labels, i):
 
 train = load('/home/claudio/Documents/DiLecce/svhn/train_32x32.mat')
 test = load('/home/claudio/Documents/DiLecce/svhn/test_32x32.mat')
-#valid = load('/home/claudio/Documents/DiLecce/svhn/extra_32x32.mat')
+valid = load('/home/claudio/Documents/DiLecce/svhn/extra_32x32.mat')
 
-# print('Train Samples Shape:', train['X'].shape)
-# print('Train  Labels Shape:', train['y'].shape)
+print('Train Samples Shape:', train['X'].shape)
+print('Train  Labels Shape:', train['y'].shape)
 
-# print('Train Samples Shape:', test['X'].shape)
-# print('Train  Labels Shape:', test['y'].shape)
+print('Train Samples Shape:', test['X'].shape)
+print('Train  Labels Shape:', test['y'].shape)
 
-# print('Train Samples Shape:', valid['X'].shape)
-# print('Train  Labels Shape:', valid['y'].shape)
+print('Train Samples Shape:', valid['X'].shape)
+print('Train  Labels Shape:', valid['y'].shape)
 
 train_samples = train['X']
 train_labels = train['y']
 test_samples = test['X']
 test_labels = test['y']
-#valid_samples = valid['X']
-#valid_labels = valid['y']
+valid_samples = valid['X']
+valid_labels = valid['y']
 
-# train_samples = np.concatenate((train_samples, valid_samples), axis=3)[:,:,:,0:574388]
-# train_labels = np.concatenate((train_labels, valid_labels))[0:574388,:]
-#
-# valid_samples = np.concatenate((train_samples, valid_samples), axis=3)[:,:,:,574388:604388]
-# valid_labels = np.concatenate((train_labels, valid_labels))[574388:604388,:]
+train_samples = np.concatenate((train_samples, valid_samples), axis=3)[:,:,:,0:574388]
+train_labels = np.concatenate((train_labels, valid_labels))[0:574388,:]
+
+valid_samples = np.concatenate((train_samples, valid_samples), axis=3)[:,:,:,574388:604388]
+valid_labels = np.concatenate((train_labels, valid_labels))[574388:604388,:]
+
+train_samples, train_labels = uniformize(train_samples, train_labels)
 
 n_train_samples, _train_labels = reformat(train_samples, train_labels)
 n_test_samples, _test_labels = reformat(test_samples, test_labels)
-#n_valid_samples, _valid_labels = reformat(valid_samples, valid_labels)
+n_valid_samples, _valid_labels = reformat(valid_samples, valid_labels)
 
 _train_samples = normalize(n_train_samples)
 _test_samples = normalize(n_test_samples)
-#_valid_samples = normalize(n_valid_samples)
+_valid_samples = normalize(n_valid_samples)
 
 num_labels = 10
 image_size = 32
@@ -122,4 +165,4 @@ if __name__ == '__main__':
     # inspect(_train_samples, _train_labels, 1234)
     distribution(train_labels, _train_samples, 'Train Labels')
     distribution(test_labels, _test_samples, 'Test Labels')
-    #distribution(valid_labels, _valid_samples, 'Valid Labels')
+    distribution(valid_labels, _valid_samples, 'Valid Labels')
