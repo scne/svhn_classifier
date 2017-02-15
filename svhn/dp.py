@@ -54,28 +54,6 @@ class Network:
             self.conv_weights.append(weights)
             self.conv_biases.append(biases)
 
-        # with tf.name_scope('Visualize_filters') as scope:
-        #     # In this section, we visualize the filters of the first convolutional layers
-        #     # We concatenate the filters into one image
-        #     # Credits for the inspiration go to Martin Gorner
-        #     W1_a = weights  # [5, 5, 1, 32]
-        #     W1pad = tf.zeros([patch_size, patch_size, in_depth, out_depth])  # [5, 5, 1, 4]  - four zero kernels for padding
-        #     # We have a 6 by 6 grid of kernepl visualizations. yet we only have 32 filters
-        #     # Therefore, we concatenate 4 empty filters
-        #     W1_b = tf.concat(3, [W1_a, W1pad, W1pad, W1pad, W1pad, W1pad])  # [5, 5, 1, 36]
-        #     W1_c = tf.split(3, 6*out_depth, W1_b)  # 36 x [5, 5, 1, 1]
-        #     W1_row0 = tf.concat(0, W1_c[0:32])  # [30, 5, 1, 1]
-        #     W1_row1 = tf.concat(0, W1_c[32:64])  # [30, 5, 1, 1]
-        #     W1_row2 = tf.concat(0, W1_c[64:96])  # [30, 5, 1, 1]
-        #     W1_row3 = tf.concat(0, W1_c[96:128])  # [30, 5, 1, 1]
-        #     W1_row4 = tf.concat(0, W1_c[128:160])  # [30, 5, 1, 1]
-        #     W1_row5 = tf.concat(0, W1_c[160:192])  # [30, 5, 1, 1]
-        #     W1_d = tf.concat(1, [W1_row0, W1_row1, W1_row2, W1_row3, W1_row4, W1_row5])  # [30, 30, 1, 1]
-        #     dim = W1_d.get_shape()
-        #     W1_e = tf.reshape(W1_d, [dim[3].value, dim[0].value, dim[1].value, dim[2].value])
-        #     Wtag = tf.placeholder(tf.string, None)
-        #     tf.summary.image("Visualize_kernels", W1_e)
-
     def add_fc(self, in_num_nodes, out_num_nodes, activation='relu', name='fc'):
         self.fc_config.append({
             'in_num_nodes': in_num_nodes,

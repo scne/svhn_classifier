@@ -121,39 +121,34 @@ def inspect(dataset, labels, i):
 
 train = load('/home/claudio/Documents/DiLecce/svhn/train_32x32.mat')
 test = load('/home/claudio/Documents/DiLecce/svhn/test_32x32.mat')
-valid = load('/home/claudio/Documents/DiLecce/svhn/extra_32x32.mat')
+extra = load('/home/claudio/Documents/DiLecce/svhn/extra_32x32.mat')
 
 print('Train Samples Shape:', train['X'].shape)
-print('Train  Labels Shape:', train['y'].shape)
+print('Train Labels Shape:', train['y'].shape)
 
-print('Train Samples Shape:', test['X'].shape)
-print('Train  Labels Shape:', test['y'].shape)
+print('Test Samples Shape:', test['X'].shape)
+print('Test Labels Shape:', test['y'].shape)
 
-print('Train Samples Shape:', valid['X'].shape)
-print('Train  Labels Shape:', valid['y'].shape)
+print('Extra Train Samples Shape:', extra['X'].shape)
+print('Extra Train Labels Shape:', extra['y'].shape)
 
 train_samples = train['X']
 train_labels = train['y']
 test_samples = test['X']
 test_labels = test['y']
-valid_samples = valid['X']
-valid_labels = valid['y']
+extra_samples = extra['X']
+extra_labels = extra['y']
 
-train_samples = np.concatenate((train_samples, valid_samples), axis=3)[:,:,:,0:574388]
-train_labels = np.concatenate((train_labels, valid_labels))[0:574388,:]
-
-valid_samples = np.concatenate((train_samples, valid_samples), axis=3)[:,:,:,574388:604388]
-valid_labels = np.concatenate((train_labels, valid_labels))[574388:604388,:]
+train_samples = np.concatenate((train_samples, extra_samples), axis=3)
+train_labels = np.concatenate((train_labels, extra_labels))
 
 train_samples, train_labels = uniformize(train_samples, train_labels)
 
 n_train_samples, _train_labels = reformat(train_samples, train_labels)
 n_test_samples, _test_labels = reformat(test_samples, test_labels)
-n_valid_samples, _valid_labels = reformat(valid_samples, valid_labels)
 
 _train_samples = normalize(n_train_samples)
 _test_samples = normalize(n_test_samples)
-_valid_samples = normalize(n_valid_samples)
 
 num_labels = 10
 image_size = 32
@@ -165,4 +160,3 @@ if __name__ == '__main__':
     # inspect(_train_samples, _train_labels, 1234)
     distribution(train_labels, _train_samples, 'Train Labels')
     distribution(test_labels, _test_samples, 'Test Labels')
-    distribution(valid_labels, _valid_samples, 'Valid Labels')
