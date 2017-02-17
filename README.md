@@ -11,15 +11,15 @@ You need to download the dataset (in ``.mat`` format) from [here](http://ufldl.s
 all files in ``svhn`` folder.
 
 #### How to
-This code is composed by three pyhton files:
-1. ``load.py`` reshape and format datasets to using in training and testing mode
+This code is composed by three python files:
+1. ``load.py`` reshape and format dataset to using in training and testing mode
 2. ``dp.py`` describe network configuration and compute performance
 3. ``main.py`` build the network and run training or test phase
 
 
 **_be careful_**
 
-If you run this code with combination of training and extra datasets you need a more the 16gb RAM and 8 core CPU
+If you run this code with combination of training and extra dataset you need a more the 16gb RAM and 8 core CPU
  to complete training in about 2 hours
 
 #### TensorBoard
