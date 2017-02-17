@@ -16,6 +16,12 @@ This code is composed by three pyhton files:
 2. ``dp.py`` describe network configuration and compute performance
 3. ``main.py`` build the network and run training or test phase
 
+
+**_be careful_**
+
+If you run this code with combination of training and extra datasets you need a more the 16gb RAM and 8 core CPU
+ to complete training in about 2 hours
+
 #### TensorBoard
 You can visualize your network trough your browser. You have to activate your *virtualenv* and run **tensorboard** command
  ```
