@@ -19,7 +19,7 @@ This code is composed by three python files:
 
 **_be careful_**
 
-If you run this code with combination of training and extra dataset you need a more the 16gb RAM and 8 core CPU
+If you run this code with combination of training and extra dataset you need a more then 16gb RAM and 8 core CPU
  to complete training in about 2 hours
 
 #### TensorBoard
